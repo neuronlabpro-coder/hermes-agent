@@ -1,0 +1,47 @@
+services:
+  hermes-agent:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: hermes-agent
+    restart: unless-stopped
+    command: gateway run
+    volumes:
+      - hermes_home:/opt/data
+    environment:
+      # At least one provider key is required (choose your provider)
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
+      # - OPENAI_API_KEY=${OPENAI_API_KEY}
+      # - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+
+      # Telegram gateway
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - TELEGRAM_ALLOWED_USERS=${TELEGRAM_ALLOWED_USERS}
+      - TELEGRAM_WEBHOOK_URL=${TELEGRAM_WEBHOOK_URL}
+      - TELEGRAM_WEBHOOK_PORT=8443
+      - TELEGRAM_WEBHOOK_SECRET=${TELEGRAM_WEBHOOK_SECRET}
+      - GATEWAY_ALLOW_ALL_USERS=false
+    ports:
+      - "8443:8443"
+
+  hermes-webui:
+    image: ghcr.io/nesquena/hermes-webui:latest
+    container_name: hermes-webui
+    restart: unless-stopped
+    depends_on:
+      - hermes-agent
+    volumes:
+      # Shared Hermes home so WebUI sees same profiles/sessions/config
+      - hermes_home:/home/hermeswebui/.hermes
+      # Optional workspace mount used by file browser
+      - ./workspace:/workspace
+    environment:
+      # Optional auth for public exposure (strongly recommended)
+      - HERMES_WEBUI_PASSWORD=${HERMES_WEBUI_PASSWORD}
+      # Optional explicit state dir (defaults are usually fine)
+      - HERMES_WEBUI_STATE_DIR=/home/hermeswebui/.hermes/webui
+    ports:
+      - "8787:8787"
+
+volumes:
+  hermes_home:
