@@ -33,11 +33,15 @@ services:
     volumes:
       # Shared Hermes home so WebUI sees same profiles/sessions/config
       - hermes_home:/home/hermeswebui/.hermes
+      # Mount Hermes Agent source so WebUI can import AIAgent
+      - ./:/hermes/hermes-agent
       # Optional workspace mount used by file browser
       - ./workspace:/workspace
     environment:
       # Optional auth for public exposure (strongly recommended)
       - HERMES_WEBUI_PASSWORD=${HERMES_WEBUI_PASSWORD}
+      # Required for split-container setup so WebUI can find Hermes Agent modules
+      - HERMES_WEBUI_AGENT_DIR=/hermes/hermes-agent
       # Optional explicit state dir (defaults are usually fine)
       - HERMES_WEBUI_STATE_DIR=/home/hermeswebui/.hermes/webui
     ports:
