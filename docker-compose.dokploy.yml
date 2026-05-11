@@ -1,0 +1,33 @@
+services:
+  hermes:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: hermes-agent
+    restart: unless-stopped
+    command: gateway run
+    volumes:
+      - hermes_data:/opt/data
+    environment:
+      # Required: at least one LLM provider key
+      # - OPENAI_API_KEY=${OPENAI_API_KEY}
+      # - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+
+      # Telegram
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+      # Set your Telegram user id to restrict access
+      # - TELEGRAM_ALLOWED_USERS=${TELEGRAM_ALLOWED_USERS}
+
+      # Webhook mode (uses your public domain)
+      - TELEGRAM_WEBHOOK_URL=https://neurona.shyntai.com/telegram
+      - TELEGRAM_WEBHOOK_PORT=8443
+      # Optional but recommended secret for webhook validation
+      # - TELEGRAM_WEBHOOK_SECRET=${TELEGRAM_WEBHOOK_SECRET}
+
+      # Keep closed by default; use true only if you really want open access
+      - GATEWAY_ALLOW_ALL_USERS=false
+    ports:
+      - "8443:8443"
+
+volumes:
+  hermes_data:
