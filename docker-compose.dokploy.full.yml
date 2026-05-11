@@ -7,7 +7,8 @@ services:
     restart: unless-stopped
     command: gateway run
     volumes:
-      - hermes_home:/opt/data
+      # Shared Hermes home (official two-container layout)
+      - hermes_home:/home/hermes/.hermes
       # Expose agent source for WebUI two-container auto-install flow
       - hermes_agent_src:/opt/hermes
     environment:
@@ -15,6 +16,12 @@ services:
       - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
       # - OPENAI_API_KEY=${OPENAI_API_KEY}
       # - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+
+      # Official two-container path expected by WebUI ecosystem
+      - HERMES_HOME=/home/hermes/.hermes
+      # Keep ownership aligned across shared volumes
+      - HERMES_UID=${UID:-1000}
+      - HERMES_GID=${GID:-1000}
 
       # Telegram gateway
       - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
@@ -24,6 +31,8 @@ services:
       - TELEGRAM_WEBHOOK_SECRET=${TELEGRAM_WEBHOOK_SECRET}
       - GATEWAY_ALLOW_ALL_USERS=false
     ports:
+      # Gateway API used by Hermes WebUI for status/health
+      - "8642:8642"
       - "8443:8443"
 
   hermes-webui:
@@ -40,10 +49,15 @@ services:
       # Optional workspace mount used by file browser
       - ./workspace:/workspace
     environment:
+      - HERMES_WEBUI_HOST=0.0.0.0
+      - HERMES_WEBUI_PORT=8787
       # Optional auth for public exposure (strongly recommended)
       - HERMES_WEBUI_PASSWORD=${HERMES_WEBUI_PASSWORD}
       # Optional explicit state dir (defaults are usually fine)
       - HERMES_WEBUI_STATE_DIR=/home/hermeswebui/.hermes/webui
+      # Keep ownership aligned across shared volumes
+      - WANTED_UID=${UID:-1000}
+      - WANTED_GID=${GID:-1000}
     ports:
       - "8787:8787"
 
