@@ -22,18 +22,9 @@ services:
       # Keep ownership aligned across shared volumes
       - HERMES_UID=${UID:-1000}
       - HERMES_GID=${GID:-1000}
-
-      # Telegram gateway
-      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
-      - TELEGRAM_ALLOWED_USERS=${TELEGRAM_ALLOWED_USERS}
-      - TELEGRAM_WEBHOOK_URL=${TELEGRAM_WEBHOOK_URL}
-      - TELEGRAM_WEBHOOK_PORT=8443
-      - TELEGRAM_WEBHOOK_SECRET=${TELEGRAM_WEBHOOK_SECRET}
       - GATEWAY_ALLOW_ALL_USERS=false
     ports:
-      # Gateway API used by Hermes WebUI for status/health
       - "8642:8642"
-      - "8443:8443"
 
   hermes-webui:
     image: ghcr.io/nesquena/hermes-webui:latest
